@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -7,9 +8,10 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                echo 'Checking out source code'
+                checkout scm
             }
         }
 
@@ -37,7 +39,22 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Deploying to Kubernetes'
+                withCredentials([file(
+                    credentialsId: 'k3s-kubeconfig',
+                    variable: 'KUBECONFIG'
+                )]) {
+                    sh '''
+                        echo "Deploying Flask to Kubernetes"
+
+                        kubectl apply -f deployment.yaml
+                        kubectl apply -f service.yaml
+
+                        kubectl rollout status deployment/flask-deployment --timeout=180s
+
+                        kubectl get pods
+                        kubectl get services
+                    '''
+                }
             }
         }
     }
