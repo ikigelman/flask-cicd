@@ -1,0 +1,5 @@
+k3s-jenkins.yaml
+* kubeconfig*
+* kubeconfig
+*.kubeconfig
+jenkins-k3s.yaml
