@@ -57,5 +57,24 @@ pipeline {
                 }
             }
         }
+
+        stage('Test') {
+            steps {
+                withCredentials([file(
+                    credentialsId: 'k3s-kubeconfig',
+                    variable: 'KUBECONFIG'
+                )]) {
+                    sh '''
+                        echo "Testing Flask application through Kubernetes Service"
+
+                        RESPONSE=$(kubectl exec deployment/flask-deployment -- python -c "import urllib.request; print(urllib.request.urlopen('http://flask-service:5000').read().decode())")
+
+                        echo "$RESPONSE"
+
+                        test "$RESPONSE" = "Hello World from Flask!"
+                    '''
+                }
+            }
+        }
     }
 }
