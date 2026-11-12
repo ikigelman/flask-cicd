@@ -65,13 +65,25 @@ pipeline {
                     variable: 'KUBECONFIG'
                 )]) {
                     sh '''
-                        echo "Testing Flask application through Kubernetes Service"
+                        echo "Test 1: Testing Flask through Kubernetes Service"
 
                         RESPONSE=$(kubectl exec deployment/flask-deployment -- python -c "import urllib.request; print(urllib.request.urlopen('http://flask-service:5000').read().decode())")
 
                         echo "$RESPONSE"
 
                         test "$RESPONSE" = "Hello World from Flask!"
+
+                        echo "Test 1 PASSED"
+
+                        echo "Test 2: Testing Flask through Traefik LoadBalancer"
+
+                        RESPONSE=$(python3 -c "import urllib.request; print(urllib.request.urlopen('http://192.168.1.250/flask', timeout=10).read().decode())")
+
+                        echo "$RESPONSE"
+
+                        test "$RESPONSE" = "Hello World from Flask!"
+
+                        echo "Test 2 PASSED"
                     '''
                 }
             }
